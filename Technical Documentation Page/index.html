@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Documentation Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav id="navbar">
+        <header>Mongoose Models Documentation</header>
+        <ul>
+            <li><a href="#Introduction" class="nav-link">Introduction</a></li>
+            <li><a href="#Compiling_your_first_model" class="nav-link">Compiling your first model</a></li>
+            <li><a href="#Constructing_Documents" class="nav-link">Constructing Documents</a></li>
+            <li><a href="#Querying" class="nav-link">Querying</a></li>
+            <li><a href="#Deleting" class="nav-link">Deleting</a></li>
+            <li><a href="#Updating" class="nav-link">Updating</a></li>
+            <li><a href="#Change_Streams" class="nav-link">Change Streams</a></li>
+            <li><a href="#Yet_more" class="nav-link">Yet more</a></li>
+        </ul>
+    </nav>
+    <main id="main-doc">
+        <section class="main-section" id="Introduction">
+            <header>Introduction</header>
+            <article>
+                <p>Models are fancy constructors compiled from Schema definitions.
+                   An instance of a model is called a document. Models 
+                   are responsible for creating and reading documents from the
+                   underlying MongoDB database.
+                </p>
+            </article>
+        </section>
+        <section class="main-section" id="Compiling_your_first_model">
+            <header>Compiling your first Model</header>
+            <article>
+                <p>When you call mongoose.model() on a schema, Mongoose compiles
+                    a model for you.
+                </p>
+                <code>
+                    <pre>
+                        var schema = new mongoose.Schema({ name: 'string', size: 'string' });
+                        var Tank = mongoose.model('Tank', schema);
+                    </pre>
+                </code>
+                <ul>
+                    <li>
+                        The first argument is the singular name of the collection your model 
+                        is for. Mongoose automatically looks for the plural, lowercased version 
+                        of your model name. Thus, for the example above, the model Tank is for 
+                        the tanks collection in the database.
+                    </li>
+                    <li>
+                        Note: The .model() function makes a copy of schema. Make sure that 
+                        you've added everything you want to schema, including hooks, before 
+                        calling .model()!    
+                    </li>
+                </ul>
+            </article>
+        </section>
+        <section class="main-section" id="Constructing_Documents">
+            <header>Constructing Documents</header>
+            <article>
+                <p>
+                    An instance of a model is called a document. Creating them and saving to 
+                    the database is easy.
+                </p>
+                <code>
+                   <pre>
+                    var Tank = mongoose.model('Tank', yourSchema);
+
+                    var small = new Tank({ size: 'small' });
+                    small.save(function (err) {
+                    if (err) return handleError(err);
+                    // saved!
+                    });
+
+                    // or
+
+                    Tank.create({ size: 'small' }, function (err, small) {
+                    if (err) return handleError(err);
+                    // saved!
+                    });
+
+                    // or, for inserting large batches of documents
+                    Tank.insertMany([{ size: 'small' }], function(err) {
+
+                    });"
+                   </pre>
+                </code>
+                <ul>
+                    <li>Note that no tanks will be created/removed until the connection your model uses is open. 
+                        Every model has an associated connection. When you use mongoose.model(), your model will 
+                        use the default mongoose connection.
+                        <code>
+                            <pre>
+                                mongoose.connect('mongodb://localhost/gettingstarted', {useNewUrlParser: true});
+                            </pre>
+                        </code>
+                    </li>
+                    <li>If you create a custom connection, use that connection's model() function instead.
+                        <code>
+                            <pre>
+                                var connection = mongoose.createConnection('mongodb://localhost:27017/test');
+                                var Tank = connection.model('Tank', yourSchema);
+                            </pre>
+                        </code>
+                    </li>
+                </ul>
+            </article>
+        </section>
+        <section class="main-section" id="Querying">
+            <header>Querying</header>
+            <article>
+                <p>inding documents is easy with Mongoose, which supports the rich query syntax of MongoDB. 
+                   Documents can be retreived using each models find, findById, findOne, or where static methods.
+                </p>
+                <code>
+                    <pre>
+                        Tank.find({ size: 'small' }).where('createdDate').gt(oneYearAgo).exec(callback);
+                    </pre>
+                </code>
+            </article>
+        </section>
+        <section class="main-section" id="Deleting">
+            <header>Deleting</header>
+            <article>
+                <p>
+                    Models have static deleteOne() and deleteMany() functions for removing all documents matching 
+                    the given filter.
+                </p>
+                <code>
+                    <pre>
+                        Tank.deleteOne({ size: 'large' }, function (err) {
+                            if (err) return handleError(err);
+                            // deleted at most one tank document
+                        });
+                    </pre>
+                </code>
+            </article>
+        </section>
+        <section class="main-section" id="Updating">
+            <header>Updating</header>
+            <article>
+                <p>
+                    Each model has its own update method for modifying documents in the database without returning 
+                    them to your application. See the API docs for more detail.    
+                </p>
+                <code>
+                    <pre>
+                        Tank.updateOne({ size: 'large' }, { name: 'T-90' }, function(err, res) {
+                            // Updated at most one doc, `res.modifiedCount` contains the number
+                            // of docs that MongoDB updated
+                        });
+                    </pre>
+                </code>
+                <ul>
+                    <li>If you want to update a single document in the db and return it to your application, use 
+                        findOneAndUpdate instead.
+                    </li>
+                </ul>
+            </article>
+        </section>
+        <section class="main-section" id="Change_Streams">
+            <header>Change Streams</header>
+            <article>
+                <p>
+                    New in MongoDB 3.6.0 and Mongoose 5.0.0
+                </p>
+                <p>
+                    Change streams provide a way for you to listen to all inserts and updates going through your 
+                    MongoDB database. Note that change streams do not work unless you're connected to a MongoDB replica set.
+                </p>
+                <code>
+                    <pre>
+                        async function run() {
+                            // Create a new mongoose model
+                            const personSchema = new mongoose.Schema({
+                              name: String
+                            });
+                            const Person = mongoose.model('Person', personSchema, 'Person');
+                          
+                            // Create a change stream. The 'change' event gets emitted when there's a
+                            // change in the database
+                            Person.watch().
+                              on('change', data => console.log(new Date(), data));
+                          
+                            // Insert a doc, will trigger the change stream handler above
+                            console.log(new Date(), 'Inserting doc');
+                            await Person.create({ name: 'Axl Rose' });
+                          }
+                    </pre>
+                </code>
+                <p>
+                    The output from the above async function will look like what you see below.
+                </p>
+                <code>
+                    <pre>
+                        2018-05-11T15:05:35.467Z 'Inserting doc'
+                        2018-05-11T15:05:35.487Z 'Inserted doc'
+                        2018-05-11T15:05:35.491Z { _id: { _data: ... },
+                        operationType: 'insert',
+                        fullDocument: { _id: 5af5b13fe526027666c6bf83, name: 'Axl Rose', __v: 0 },
+                        ns: { db: 'test', coll: 'Person' },
+                        documentKey: { _id: 5af5b13fe526027666c6bf83 } }
+                    </pre>
+                </code>
+            </article>
+        </section>
+        <section class="main-section" id="Yet_more">
+            <header>Yet more</header>
+            <article>
+                <p>
+                    The API docs cover many additional methods available like count, mapReduce, aggregate, and more.
+                </p>
+            </article>
+        </section>    
+    </main>
+</body>
+</html>

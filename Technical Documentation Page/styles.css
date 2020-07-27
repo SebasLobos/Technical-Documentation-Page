@@ -1,0 +1,76 @@
+body{
+    padding: 5px   ;
+}
+
+#navbar{
+    display: grid;
+    grid-template-rows: 1fr 4fr;
+}
+
+#navbar header{
+   text-align: center;
+   font-size: 1.7em;
+   font-weight: 900;
+}
+
+#navbar ul{
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    text-align: left;
+    padding: 0;
+    
+}
+
+#navbar li{
+    list-style: none;
+    border: slategray solid 1px;
+    padding: 5px;
+}
+
+#navbar a{
+    text-decoration: none;
+    color: black;
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.main-section header{
+    font-size: 20px;
+    font-weight: 800;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.main-section p{
+    font-size: 17px;
+    text-align: left;
+}
+
+.main-section pre{
+    background: lightgray;
+    text-align: left;
+    white-space: pre-line;
+    padding: 8px;
+}
+
+@media(min-width: 850px){
+    body{
+        display: grid;
+        grid-template-columns: 1f 3fr;
+        grid-auto-flow: column;
+    }
+
+    #navbar{
+        display: inline-flex;
+        flex-flow: column;
+        border: black 2px solid;
+    }
+    
+    #navbar ul{
+        text-align: center;
+    }
+
+    #main-doc{
+        border: black 2px solid;
+        padding: 5px 10px;
+    }
+}
